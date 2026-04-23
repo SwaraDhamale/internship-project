@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Campus Smart Canteen</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f172a;--navy2:#1e293b;--navy3:#334155;
+  --accent:#3b82f6;--accent2:#60a5fa;
+  --green:#22c55e;--orange:#f97316;--red:#ef4444;
+  --text:#f8fafc;--text2:#94a3b8;--text3:#64748b;
+  --card:#1e293b;--card2:#253347;
+  --border:rgba(255,255,255,0.08);
+  --radius:12px;--radius-sm:8px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);font-size:14px}
+h1,h2,h3,h4,.logo{font-family:'Syne',sans-serif}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:240px 1fr;height:100vh;overflow:hidden}
+.sidebar{background:var(--navy);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.main{display:flex;flex-direction:column;overflow:hidden;background:#111827}
+
+/* ── SIDEBAR ── */
+.sb-brand{padding:22px 20px 16px;border-bottom:1px solid var(--border)}
+.logo{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.logo span{color:var(--accent)}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:3px;font-family:'DM Sans',sans-serif;font-weight:300}
+
+.wallet-panel{margin:14px 12px;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.wp-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:6px}
+.wp-amount{font-size:26px;font-weight:600;color:var(--green);font-family:'Syne',sans-serif;line-height:1}
+.wp-amt-sub{font-size:11px;color:var(--text3);margin-top:2px;margin-bottom:10px}
+.topup-row{display:flex;gap:6px}
+.topup-row input{flex:1;min-width:0;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;transition:border .15s}
+.topup-row input:focus{border-color:var(--accent)}
+.topup-row input::placeholder{color:var(--text3)}
+.topup-btn{background:var(--accent);border:none;border-radius:var(--radius-sm);padding:6px 12px;color:#fff;font-size:12px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s}
+.topup-btn:hover{opacity:.85}
+
+.nav{padding:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;margin-bottom:2px;position:relative}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.6}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:var(--text)}
+.nav-item.active{background:rgba(59,130,246,0.12);color:var(--accent2)}
+.nav-item.active svg{opacity:1}
+.nav-dot{margin-left:auto;background:var(--orange);color:#fff;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;font-family:'Syne',sans-serif}
+
+.sb-info{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border)}
+.info-chip{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;color:var(--text3)}
+.info-chip svg{width:13px;height:13px;opacity:.5;flex-shrink:0}
+
+/* ── MAIN TOPBAR ── */
+.topbar{background:var(--navy2);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.topbar-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text)}
+.alert-bar{padding:9px 20px;font-size:12px;display:none;flex-shrink:0}
+.alert-error{background:rgba(239,68,68,0.15);color:#fca5a5;border-bottom:1px solid rgba(239,68,68,0.2)}
+.alert-success{background:rgba(34,197,94,0.12);color:#86efac;border-bottom:1px solid rgba(34,197,94,0.18)}
+
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* ── MENU ── */
+.cat-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.cat-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-family:'Syne',sans-serif;font-weight:600;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+.cat-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text)}
+.cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.food-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .15s,transform .15s}
+.food-card:hover{border-color:rgba(59,130,246,0.35);transform:translateY(-2px)}
+.food-img-wrap{width:100%;height:118px;overflow:hidden;position:relative;background:#1a2640}
+.food-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.food-card:hover .food-img-wrap img{transform:scale(1.06)}
+.prep-tag{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;backdrop-filter:blur(4px)}
+.cat-tag{position:absolute;top:6px;left:6px;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;font-family:'Syne',sans-serif}
+.cat-main{background:rgba(59,130,246,0.8);color:#fff}
+.cat-snack{background:rgba(249,115,22,0.8);color:#fff}
+.cat-drink{background:rgba(34,197,94,0.8);color:#fff}
+.food-body{padding:10px}
+.food-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.food-desc{font-size:11px;color:var(--text3);line-height:1.4;margin-bottom:8px}
+.food-row{display:flex;align-items:center;justify-content:space-between}
+.food-price{font-size:15px;font-weight:600;font-family:'Syne',sans-serif;color:var(--accent2)}
+.qty-ctrl{display:flex;align-items:center;gap:5px}
+.qty-btn{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;line-height:1}
+.qty-btn:hover{background:rgba(255,255,255,0.12)}
+.qty-num{font-size:12px;font-weight:600;min-width:16px;text-align:center;color:var(--accent2);font-family:'Syne',sans-serif}
+
+/* ── CART ── */
+.cart-layout{display:grid;grid-template-columns:1fr 290px;gap:16px;align-items:start}
+.cart-list{display:flex;flex-direction:column;gap:8px}
+.cart-empty{text-align:center;padding:4rem 1rem;color:var(--text3)}
+.cart-empty-icon{font-size:48px;margin-bottom:12px}
+.cart-item{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px}
+.ci-img{width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.ci-body{flex:1;min-width:0}
+.ci-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
+.ci-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.ci-price{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;font-family:'Syne',sans-serif}
+.rm-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.rm-btn:hover{background:rgba(239,68,68,0.15);color:var(--red);border-color:rgba(239,68,68,0.3)}
+
+/* ── ORDER PANEL ── */
+.order-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:sticky;top:0}
+.op-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px}
+.del-section-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px;font-family:'Syne',sans-serif}
+.del-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.del-opt{border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;cursor:pointer;transition:all .15s}
+.del-opt:hover{border-color:rgba(255,255,255,0.15)}
+.del-opt.selected{border-color:var(--accent);background:rgba(59,130,246,0.08)}
+.del-opt-t{font-size:12px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif}
+.del-opt-s{font-size:11px;color:var(--text3);margin-top:1px}
+.hostel-inp{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px;transition:border .15s}
+.hostel-inp:focus{border-color:var(--accent)}
+.hostel-inp::placeholder{color:var(--text3)}
+.divider{height:1px;background:var(--border);margin:10px 0}
+.sum-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);padding:3px 0}
+.sum-total{display:flex;justify-content:space-between;font-size:15px;font-weight:700;font-family:'Syne',sans-serif;color:var(--text);margin-top:8px;padding-top:10px;border-top:1px solid var(--border)}
+.pay-btn{width:100%;margin-top:14px;padding:11px;border-radius:var(--radius-sm);background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:opacity .15s;letter-spacing:.02em}
+.pay-btn:hover:not(:disabled){opacity:.88}
+.pay-btn:disabled{opacity:.3;cursor:not-allowed}
+.insufficient{font-size:11px;color:#fca5a5;text-align:center;margin-top:6px}
+
+/* ── TOKEN SCREEN ── */
+.token-screen{display:flex;flex-direction:column;align-items:center;padding:3rem 1rem;text-align:center}
+.token-ring{width:110px;height:110px;border-radius:50%;background:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:18px}
+.token-n{font-family:'Syne',sans-serif;font-size:30px;font-weight:700;color:#fff;line-height:1}
+.token-l{font-size:10px;color:rgba(255,255,255,.6);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.token-h{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+.token-s{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:6px}
+.token-items{font-size:11px;color:var(--text3);margin-bottom:20px;max-width:260px;line-height:1.6}
+.chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:'Syne',sans-serif;margin-top:6px}
+.chip-green{background:rgba(34,197,94,0.15);color:#86efac}
+.new-order-btn{padding:10px 24px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;font-family:'Syne',sans-serif;font-weight:600;cursor:pointer;transition:all .15s}
+.new-order-btn:hover{background:rgba(255,255,255,0.06)}
+
+/* ── ORDERS ── */
+.orders-grid{display:flex;flex-direction:column;gap:8px}
+.oh{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px}
+.oh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.oh-token{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text)}
+.oh-items{font-size:12px;color:var(--text3);margin-bottom:8px;line-height:1.5}
+.oh-foot{display:flex;justify-content:space-between;align-items:center}
+.badge{display:inline-block;font-size:10px;padding:2px 9px;border-radius:20px;font-weight:700;font-family:'Syne',sans-serif}
+.badge-green{background:rgba(34,197,94,0.15);color:#86efac}
+.badge-blue{background:rgba(59,130,246,0.15);color:#93c5fd}
+.badge-orange{background:rgba(249,115,22,0.15);color:#fdba74}
+.oh-total{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--navy3);border-radius:10px}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="logo">Campus<span>Canteen</span></div>
+      <div class="logo-sub">Smart pre-order system</div>
+    </div>
+
+    <div class="wallet-panel">
+      <div class="wp-label">Student Wallet</div>
+      <div class="wp-amount">&#x20B9;<span id="walletAmt">500</span></div>
+      <div class="wp-amt-sub">Available balance</div>
+      <div class="topup-row">
+        <input type="number" id="topupVal" placeholder="&#x20B9; Add funds" min="1" max="5000"/>
+        <button class="topup-btn" onclick="topup()">Top up</button>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-item active" onclick="switchTab('menu',this)" id="nav-menu">
+        <svg viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="7" width="10" height="2" rx="1"/><rect x="1" y="12" width="12" height="2" rx="1"/></svg>
+        Menu
+      </div>
+      <div class="nav-item" onclick="switchTab('cart',this)" id="nav-cart">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h2l2.5 8h7l1.5-5H4.5"/><circle cx="6.5" cy="13.5" r="1.2"/><circle cx="11.5" cy="13.5" r="1.2"/></svg>
+        Cart
+        <span class="nav-dot" id="cartBadge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" onclick="switchTab('orders',this)" id="nav-orders">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1"/><line x1="4" y1="5" x2="12" y2="5"/><line x1="4" y1="8" x2="9" y2="8"/><line x1="4" y1="11" x2="10" y2="11"/></svg>
+        Orders
+      </div>
+    </nav>
+
+    <div class="sb-info">
+      <div class="info-chip">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm-.5 2v4.5l3 1.5.5-.87-2.5-1.26V5H7.5z"/></svg>
+        Token-based queue system
+      </div>
+      <div class="info-chip">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1C5.24 1 3 3.24 3 6c0 4.17 5 9 5 9s5-4.83 5-9c0-2.76-2.24-5-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z"/></svg>
+        Hostel delivery available
+      </div>
+      <div class="info-chip">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 7.75H5.5v-1.5h1.75v-3h1.5v4.5z"/></svg>
+        Fast pickup at counter
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbarTitle">Today's Menu</span>
+    </div>
+    <div class="alert-bar" id="alertBar"></div>
+    <div class="content" id="contentArea"></div>
+  </div>
+
+</div>
+
+<script>
+const MENU=[
+  {id:1,name:'Veg Burger',price:50,img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80',desc:'Crispy patty with fresh veggies & sauces',cat:'snack',prep:5},
+  {id:2,name:'Paneer Pizza',price:120,img:'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80',desc:'Paneer, capsicum & olives on thin crust',cat:'main',prep:12},
+  {id:3,name:'Cold Coffee',price:80,img:'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80',desc:'Blended with ice cream, rich & creamy',cat:'drink',prep:3},
+  {id:4,name:'Masala Dosa',price:60,img:'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=400&q=80',desc:'Crispy dosa with spiced potato filling',cat:'main',prep:8},
+  {id:5,name:'Samosa',price:30,img:'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&q=80',desc:'Golden fried with spicy filling, 2 pcs',cat:'snack',prep:4},
+  {id:6,name:'Mango Shake',price:70,img:'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&q=80',desc:'Fresh mango blended smooth',cat:'drink',prep:4},
+  {id:7,name:'Pasta',price:90,img:'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&q=80',desc:'Creamy white sauce penne pasta',cat:'main',prep:10},
+  {id:8,name:'Grilled Sandwich',price:45,img:'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80',desc:'Grilled veggie sandwich with cheese',cat:'snack',prep:5},
+  {id:9,name:'Lemon Soda',price:25,img:'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=400&q=80',desc:'Refreshing with mint & lime',cat:'drink',prep:2},
+  {id:10,name:'Chole Bhature',price:75,img:'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&q=80',desc:'Classic North Indian combo',cat:'main',prep:10}
+];
+
+let wallet=500, cart={}, orders=[], deliveryMode='pickup', hostelBlock='', activeCat='all', activeTab='menu';
+
+/* ── WALLET ── */
+function topup(){
+  const v=parseInt(document.getElementById('topupVal').value);
+  if(!v||v<1||v>5000){showAlert('Enter an amount between ₹1 and ₹5000','error');return;}
+  wallet+=v;
+  document.getElementById('walletAmt').textContent=wallet;
+  document.getElementById('topupVal').value='';
+  showAlert('Wallet topped up with ₹'+v,'success');
+}
+
+/* ── NAVIGATION ── */
+function switchTab(tab,el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  activeTab=tab;
+  const titles={menu:"Today's Menu",cart:'Your Cart',orders:'Order History'};
+  document.getElementById('topbarTitle').textContent=titles[tab];
+  if(tab==='menu') renderMenu();
+  else if(tab==='cart') renderCart();
+  else renderOrders();
+}
+
+/* ── MENU ── */
+function renderMenu(){
+  const items=activeCat==='all'?MENU:MENU.filter(m=>m.cat===activeCat);
+  const html=`
+    <div class="cat-bar">
+      <button class="cat-btn ${activeCat==='all'?'active':''}" onclick="setCat('all',this)">All</button>
+      <button class="cat-btn ${activeCat==='main'?'active':''}" onclick="setCat('main',this)">Main Course</button>
+      <button class="cat-btn ${activeCat==='snack'?'active':''}" onclick="setCat('snack',this)">Snacks</button>
+      <button class="cat-btn ${activeCat==='drink'?'active':''}" onclick="setCat('drink',this)">Drinks</button>
+    </div>
+    <div class="menu-grid">
+      ${items.map(item=>{
+        const q=cart[item.id]||0;
+        return `<div class="food-card">
+          <div class="food-img-wrap">
+            <img src="${item.img}" alt="${item.name}" loading="lazy"/>
+            <span class="prep-tag">${item.prep} min</span>
+            <span class="cat-tag cat-${item.cat}">${item.cat}</span>
+          </div>
+          <div class="food-body">
+            <div class="food-name">${item.name}</div>
+            <div class="food-desc">${item.desc}</div>
+            <div class="food-row">
+              <span class="food-price">&#x20B9;${item.price}</span>
+              <div class="qty-ctrl">
+                <button class="qty-btn" onclick="changeQty(${item.id},-1)">&#8722;</button>
+                <span class="qty-num" id="qn-${item.id}">${q}</span>
+                <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  document.getElementById('contentArea').innerHTML=html;
+}
+
+function setCat(cat,el){
+  activeCat=cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const items=cat==='all'?MENU:MENU.filter(m=>m.cat===cat);
+  document.querySelector('.menu-grid').innerHTML=items.map(item=>{
+    const q=cart[item.id]||0;
+    return `<div class="food-card">
+      <div class="food-img-wrap">
+        <img src="${item.img}" alt="${item.name}" loading="lazy"/>
+        <span class="prep-tag">${item.prep} min</span>
+        <span class="cat-tag cat-${item.cat}">${item.cat}</span>
+      </div>
+      <div class="food-body">
+        <div class="food-name">${item.name}</div>
+        <div class="food-desc">${item.desc}</div>
+        <div class="food-row">
+          <span class="food-price">&#x20B9;${item.price}</span>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty(${item.id},-1)">&#8722;</button>
+            <span class="qty-num" id="qn-${item.id}">${q}</span>
+            <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function changeQty(id,d){
+  const n=Math.max(0,(cart[id]||0)+d);
+  if(n===0) delete cart[id]; else cart[id]=n;
+  const el=document.getElementById('qn-'+id);
+  if(el) el.textContent=n;
+  updateBadge();
+}
+
+function updateBadge(){
+  const t=Object.values(cart).reduce((a,b)=>a+b,0);
+  const b=document.getElementById('cartBadge');
+  b.style.display=t>0?'inline':'none';
+  b.textContent=t;
+}
+
+/* ── CART ── */
+function getItems(){
+  return Object.entries(cart).map(([id,qty])=>{
+    const i=MENU.find(m=>m.id===+id);
+    return {...i,qty,sub:i.price*qty};
+  });
+}
+function getTotal(){return getItems().reduce((s,i)=>s+i.sub,0);}
+
+function renderCart(){
+  const items=getItems();
+  if(!items.length){
+    document.getElementById('contentArea').innerHTML=`
+      <div class="cart-empty">
+        <div class="cart-empty-icon">&#128722;</div>
+        <div style="font-size:15px;font-weight:600;font-family:'Syne',sans-serif;color:#e2e8f0;margin-bottom:6px">Your cart is empty</div>
+        <div style="font-size:12px;color:#64748b">Head to the menu to add items</div>
+      </div>`;
+    return;
+  }
+  const sub=getTotal(), dc=deliveryMode==='hostel'?10:0, tot=sub+dc;
+  document.getElementById('contentArea').innerHTML=`
+    <div class="cart-layout">
+      <div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;font-family:'Syne',sans-serif">${items.length} item${items.length>1?'s':''}</div>
+        <div class="cart-list">
+          ${items.map(i=>`
+            <div class="cart-item">
+              <img class="ci-img" src="${i.img}" alt="${i.name}" loading="lazy"/>
+              <div class="ci-body">
+                <div class="ci-name">${i.name}</div>
+                <div class="ci-sub">&#x20B9;${i.price} &times; ${i.qty}</div>
+              </div>
+              <span class="ci-price">&#x20B9;${i.sub}</span>
+              <button class="rm-btn" onclick="removeItem(${i.id})" title="Remove">&#215;</button>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="order-panel">
+        <div class="op-title">Order Summary</div>
+        <div class="del-section-label">Delivery option</div>
+        <div class="del-opts">
+          <div class="del-opt ${deliveryMode==='pickup'?'selected':''}" onclick="setDel('pickup')">
+            <div class="del-opt-t">Fast Pickup &middot; Free</div>
+            <div class="del-opt-s">Collect at counter &middot; 10&ndash;15 min</div>
+          </div>
+          <div class="del-opt ${deliveryMode==='hostel'?'selected':''}" onclick="setDel('hostel')">
+            <div class="del-opt-t">Hostel Delivery &middot; &#x20B9;10</div>
+            <div class="del-opt-s">Delivered to block &middot; 25&ndash;30 min</div>
+          </div>
+        </div>
+        ${deliveryMode==='hostel'?`<input class="hostel-inp" type="text" placeholder="Block / room number" value="${hostelBlock}" oninput="hostelBlock=this.value"/>`:''}
+        <div class="sum-row"><span>Subtotal</span><span>&#x20B9;${sub}</span></div>
+        <div class="sum-row"><span>Delivery</span><span>${dc>0?'&#x20B9;'+dc:'Free'}</span></div>
+        <div class="sum-row"><span>Wallet balance</span><span>&#x20B9;${wallet}</span></div>
+        <div class="sum-total"><span>Total</span><span>&#x20B9;${tot}</span></div>
+        <button class="pay-btn" onclick="placeOrder()" ${wallet<tot?'disabled':''}>
+          ${wallet<tot?'Add &#x20B9;'+(tot-wallet)+' to pay':'Pay &#x20B9;'+tot+' from Wallet'}
+        </button>
+        ${wallet<tot?`<div class="insufficient">Insufficient balance &mdash; top up wallet</div>`:''}
+      </div>
+    </div>`;
+}
+
+function setDel(m){deliveryMode=m;renderCart();}
+function removeItem(id){delete cart[id];updateBadge();renderCart();}
+
+function placeOrder(){
+  if(deliveryMode==='hostel'&&!hostelBlock.trim()){showAlert('Please enter your hostel block / room number','error');return;}
+  const items=getItems(),sub=getTotal(),dc=deliveryMode==='hostel'?10:0,tot=sub+dc;
+  if(wallet<tot){showAlert('Insufficient wallet balance','error');return;}
+  wallet-=tot;
+  document.getElementById('walletAmt').textContent=wallet;
+  const token=Math.floor(1000+Math.random()*9000);
+  orders.unshift({token,items,tot,deliveryMode,hostelBlock:hostelBlock,time:new Date().toLocaleTimeString()});
+  cart={};updateBadge();
+  const eta=deliveryMode==='hostel'?'25&ndash;30 min':'10&ndash;15 min';
+  const dlabel=deliveryMode==='hostel'?'Delivering to <strong>'+hostelBlock+'</strong>':'Ready for <strong>pickup at counter</strong>';
+  document.getElementById('contentArea').innerHTML=`
+    <div class="token-screen">
+      <div class="token-ring">
+        <div class="token-n">${token}</div>
+        <div class="token-l">TOKEN</div>
+      </div>
+      <div class="token-h">Order Confirmed!</div>
+      <div class="token-s">${dlabel}<br>Estimated time: <strong>${eta}</strong></div>
+      <div class="token-items">${items.map(i=>i.name+' &times;'+i.qty).join(' &middot; ')}</div>
+      <span class="chip chip-green">&#x20B9;${tot} deducted from wallet</span><br><br>
+      <button class="new-order-btn" onclick="goMenu()">Order More</button>
+    </div>`;
+}
+
+function goMenu(){
+  switchTab('menu',document.getElementById('nav-menu'));
+}
+
+/* ── ORDERS ── */
+function renderOrders(){
+  if(!orders.length){
+    document.getElementById('contentArea').innerHTML=`
+      <div class="cart-empty">
+        <div class="cart-empty-icon">&#128203;</div>
+        <div style="font-size:15px;font-weight:600;font-family:'Syne',sans-serif;color:#e2e8f0;margin-bottom:6px">No orders yet</div>
+        <div style="font-size:12px;color:#64748b">Place your first order from the menu</div>
+      </div>`;
+    return;
+  }
+  document.getElementById('contentArea').innerHTML=`
+    <div class="orders-grid">
+      ${orders.map(o=>`
+        <div class="oh">
+          <div class="oh-head">
+            <span class="oh-token">Token #${o.token}</span>
+            <span class="badge badge-green">Confirmed</span>
+          </div>
+          <div class="oh-items">${o.items.map(i=>i.name+' &times;'+i.qty).join(' &middot; ')}</div>
+          <div class="oh-foot">
+            <span style="font-size:11px;color:#64748b">
+              ${o.deliveryMode==='hostel'?'&#127968; Hostel &middot; '+o.hostelBlock:'&#9993; Pickup'} &middot; ${o.time}
+            </span>
+            <span class="oh-total">&#x20B9;${o.tot}</span>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+/* ── ALERT ── */
+function showAlert(msg,type){
+  const b=document.getElementById('alertBar');
+  b.className='alert-bar alert-'+type;
+  b.textContent=msg;b.style.display='block';
+  setTimeout(()=>{b.style.display='none';},3000);
+}
+
+/* ── INIT ── */
+renderMenu();
+</script>
+</body>
+</html>
